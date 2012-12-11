@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<phpunit
+  bootstrap   = 'bootstrap.php'
+  colors      = 'true'
+  stopOnError = 'false'
+>
+  <testsuites>
+    <testsuite name='PDeploy:Core'>
+      <file>PDeploy.test.php</file>
+    </testsuite>
+    <testsuite name='PDeploy:Client'>
+      <file>Optimizer.test.php</file>
+    </testsuite>
+    <testsuite name='PDeploy:Filesystem'>
+      <file>Filesystem.Linux.test.php</file>
+    </testsuite>
+    <testsuite name='PDeploy:Database'>
+      <file>Database.MySQL.test.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>
