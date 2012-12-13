@@ -117,10 +117,12 @@ class Database_MySQL implements DatabaseInterface {
       $replacements = array();
       $pathinfo = pathinfo($sql);
       $filter_found = false;
-      foreach ($ignore as $i) {
-        if (stripos($i, $pathinfo['filename']) !== false) {
-          $filter_found = true;
-          break;
+      if (is_array($ignore)) {
+        foreach ($ignore as $i) {
+          if (stripos($i, $pathinfo['filename']) !== false) {
+            $filter_found = true;
+            break;
+          }
         }
       }
       if ($filter_found) continue;
