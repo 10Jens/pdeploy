@@ -233,11 +233,15 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
   /**
    * @depends test_assertSymlink_positive
    * @depends test_assertSymlink_negative
+   * @depends test_symlink
    */
   public function test_installSymlink( ) {
-    $target     = 'boostrap.php';
+    $target     = 'bootstrap.php';
     $target2    = 'phpunit.xml';
     $name       = 'test-link';
+    $this->assertTrue(is_file($target));
+    $this->assertTrue(is_file($target2));
+    $this->assertFalse(@readlink($name));
     // See if we can get a symlink created.
     $this->pd->installSymlink($target, $name);
     $this->pd->assertSymlink($name, $target);
