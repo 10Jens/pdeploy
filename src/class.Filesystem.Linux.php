@@ -56,6 +56,11 @@ class Filesystem_Linux implements FilesystemInterface {
     return;
   }
 
+  public function symlink($target, $link) {
+    if (!\symlink($target, $link)) \PDeploy::error("Failed to create symlink '%s' -> '%s'.", $target, $link);
+    return;
+  }
+
   public function tempFile( ) {
     $name = tempnam(sys_get_temp_dir(), self::TEMP_FILE_PREFIX);
     $this->assertFile($name);

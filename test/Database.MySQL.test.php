@@ -34,7 +34,7 @@ class Test_Class_Database_MySQL extends PDeploy_Unit_Test {
    * @depends test_exists
    */
   public function test_create( ) {
-    $foo = 'test_db_' . substr(md5(time()), -10);
+    $foo = 'pdeploy_test_' . substr(md5(time()), -10);
     $this->assertTrue(self::$pd->create($foo), "Failed to create database '$foo'.");
     $pdo = new PDO('mysql:host=' . DB_HOSTNAME . ';port=' . DB_PORT . ';', DB_USERNAME, DB_PASSWORD);
     $query = sprintf('DROP DATABASE `%s`;', $foo);

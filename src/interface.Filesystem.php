@@ -19,6 +19,7 @@ interface FilesystemInterface {
   public function move($from, $to);
   public function delete($file);
   public function mkdir($name, $ownership, $recursive);
+  public function symlink($target, $link);
   public function tempFile( );
   public function tempDir( );
   public function setFileDepot($dirname);

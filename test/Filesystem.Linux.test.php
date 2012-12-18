@@ -133,6 +133,20 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     return;
   }
 
+  public function test_symlink( ) {
+    $target = 'test-directory';
+    $link   = 'link-to-dir';
+    $this->assertFalse(is_dir($target));
+    $this->assertFalse(file_exists($link));
+    mkdir($target);
+    $this->assertTrue(is_dir($target));
+    $this->pd->symlink($target, $link);
+    $this->assertSame($target, readlink($link));
+    $this->assertTrue(unlink($link));
+    $this->assertTrue(rmdir($target));
+    return;
+  }
+
   public function test_tempFile( ) {
     $temp_file = $this->pd->tempFile();
     $pathinfo = pathinfo($temp_file);
