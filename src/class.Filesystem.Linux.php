@@ -30,6 +30,13 @@ class Filesystem_Linux implements FilesystemInterface {
     return;
   }
 
+  public function assertSymlink($name, $target = null) {
+    $rl = @readlink($name);
+    if (!$rl) \PDeploy::error("'%s' is not a symlink.", $name);
+    if ($target !== null && $rl !== $target) \PDeploy::error("'%s' is not a symlink to '%s'.", $name, $target);
+    return;
+  }
+
   public function touch($file, $ownership = 0755) {
     if (!\touch($file)) \PDeploy::error("Failed to touch '%s'.", $file);
     if (!chmod($file, $ownership)) \PDeploy::error("Could not change permissions on '%s' to %o.", $file, $ownership);
@@ -56,8 +63,8 @@ class Filesystem_Linux implements FilesystemInterface {
     return;
   }
 
-  public function symlink($target, $link) {
-    if (!\symlink($target, $link)) \PDeploy::error("Failed to create symlink '%s' -> '%s'.", $target, $link);
+  public function symlink($target, $name) {
+    if (!\symlink($target, $name)) \PDeploy::error("Failed to create symlink '%s' -> '%s'.", $target, $name);
     return;
   }
 
@@ -96,6 +103,14 @@ class Filesystem_Linux implements FilesystemInterface {
     $dest = $directory . (substr($directory, -1) !== '/' ? '/' : '') . $file;
     if (!is_file($dest)) $this->copy($src, $dest);
     if (!chmod($dest, $ownership)) \PDeploy::error("Could not change permissions on '%s' to %o.", $dest, $ownership);
+    return;
+  }
+
+  public function installSymlink($target, $name) {
+    if (($current_target = @readlink($name)) != $target) {
+      if ($current_target != false) $this->delete($name);
+      $this->symlink($target, $name);
+    }
     return;
   }
 

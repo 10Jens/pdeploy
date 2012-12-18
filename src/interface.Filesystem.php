@@ -14,6 +14,7 @@ interface FilesystemInterface {
   public function assertWritable($file);
   public function assertFile($file);
   public function assertDirectory($dir);
+  public function assertSymlink($name, $target);
   public function touch($file, $ownership);
   public function copy($from, $to);
   public function move($from, $to);
@@ -25,5 +26,6 @@ interface FilesystemInterface {
   public function setFileDepot($dirname);
   public function getFileDepot( );
   public function installFile($file, $directory, $ownership);
+  public function installSymlink($target, $name);
 
 };

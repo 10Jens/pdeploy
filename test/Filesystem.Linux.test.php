@@ -75,6 +75,25 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     return;
   }
 
+  public function test_assertSymlink_positive( ) {
+    $target = 'boostrap.php';
+    $name = 'l';
+    $this->assertTrue(symlink($target, $name));
+    $this->pd->assertSymlink($name);
+    $this->pd->assertSymlink($name, $target);
+    $this->assertTrue(unlink($name));
+    return;
+  }
+
+  /**
+   * @expectedException         PDeploy\Exception
+   * @expectedExceptionMessage  not a symlink
+   */
+  public function test_assertSymlink_negative( ) {
+    $this->pd->assertSymlink('notalink');
+    return;
+  }
+
   public function test_touch( ) {
     $file = 'test-doesnt-exist-yet';
     $this->assertFalse(is_file($file));
@@ -135,14 +154,14 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
 
   public function test_symlink( ) {
     $target = 'test-directory';
-    $link   = 'link-to-dir';
+    $name   = 'link-to-dir';
     $this->assertFalse(is_dir($target));
-    $this->assertFalse(file_exists($link));
+    $this->assertFalse(file_exists($name));
     mkdir($target);
     $this->assertTrue(is_dir($target));
-    $this->pd->symlink($target, $link);
-    $this->assertSame($target, readlink($link));
-    $this->assertTrue(unlink($link));
+    $this->pd->symlink($target, $name);
+    $this->assertSame($target, readlink($name));
+    $this->assertTrue(unlink($name));
     $this->assertTrue(rmdir($target));
     return;
   }
@@ -208,6 +227,28 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     $this->pd->installFile($file, $dir);
     $this->pd->assertFile($path);
     $this->assertTrue(unlink($path));
+    return;
+  }
+
+  /**
+   * @depends test_assertSymlink_positive
+   * @depends test_assertSymlink_negative
+   */
+  public function test_installSymlink( ) {
+    $target     = 'boostrap.php';
+    $target2    = 'phpunit.xml';
+    $name       = 'test-link';
+    // See if we can get a symlink created.
+    $this->pd->installSymlink($target, $name);
+    $this->pd->assertSymlink($name, $target);
+    // We try it again to make sure there isn't an error.
+    $this->pd->installSymlink($target, $name);
+    $this->pd->assertSymlink($name, $target);
+    // Give it a different target and make sure it updates the link.
+    $this->pd->installSymlink($target2, $name);
+    $this->pd->assertSymlink($name, $target2);
+    // Clean up after ourselves.
+    $this->assertTrue(unlink($name));
     return;
   }
 
