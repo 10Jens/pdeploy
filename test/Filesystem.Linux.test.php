@@ -230,6 +230,20 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     return;
   }
 
+  public function test_installDirectory( ) {
+    $dir = 'testing';
+    $this->assertFalse(is_dir($dir));
+    // Give it a whirl.
+    $this->pd->installDirectory($dir);
+    $this->assertTrue(is_dir($dir));
+    // Try it again to make sure it doesn't whine.
+    $this->pd->installDirectory($dir);
+    $this->assertTrue(is_dir($dir));
+    // Clean up.
+    $this->assertTrue(rmdir($dir));
+    return;
+  }
+
   /**
    * @depends test_assertSymlink_positive
    * @depends test_assertSymlink_negative
