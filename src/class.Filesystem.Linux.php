@@ -107,7 +107,8 @@ class Filesystem_Linux implements FilesystemInterface {
   }
 
   public function installDirectory($directory, $ownership = 0755) {
-
+    if (!is_dir($directory)) $this->mkdir($directory);
+    if (!chmod($directory, $ownership)) \PDeploy::error("Could not change permissions on '%s' to '%o.", $directory, $ownership);
     return;
   }
 
