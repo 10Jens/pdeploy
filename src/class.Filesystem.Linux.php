@@ -106,6 +106,11 @@ class Filesystem_Linux implements FilesystemInterface {
     return;
   }
 
+  public function installDirectory($directory, $ownership = 0755) {
+
+    return;
+  }
+
   public function installSymlink($target, $name) {
     if (($current_target = @readlink($name)) != $target) {
       if ($current_target != false) $this->delete($name);

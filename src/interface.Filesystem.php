@@ -26,6 +26,7 @@ interface FilesystemInterface {
   public function setFileDepot($dirname);
   public function getFileDepot( );
   public function installFile($file, $directory, $ownership);
+  public function installDirectory($directory, $ownership);
   public function installSymlink($target, $name);
 
 };
