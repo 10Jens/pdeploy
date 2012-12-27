@@ -3,6 +3,10 @@
  * [PLACEHOLDER]
 **/
 
+/**
+ * Most of the methods in this class are pretty hard to test well, so I didn't spend a great deal
+ * of attention on them.
+**/
 class Test_Class_PDeploy extends PDeploy_Unit_Test {
 
   private $pd = null;
@@ -44,6 +48,11 @@ class Test_Class_PDeploy extends PDeploy_Unit_Test {
    */
   public function test_requireExtension_negative( ) {
     $this->pd->requireExtension('abcdef');
+    return;
+  }
+
+  public function test_shell( ) {
+    $this->assertRegExp('/bootstrap\.php/i', $this->pd->shell('dir'));
     return;
   }
 
