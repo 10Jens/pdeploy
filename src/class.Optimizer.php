@@ -30,10 +30,15 @@ class Optimizer {
       $input_size  += filesize($source);
       $output_size += strlen($compiled);
     }
+    $this->_map = array_merge_recursive($this->_map, array_fill_keys($sources, $dest));
     // Attach some metadata and save the crushed output into $destination.
     $output_text = $this->header(count($sources), $input_size, $output_size) . $output_text;
     if (!file_put_contents($dest, $output_text)) trigger_error("Failed to save output to file '$dest'.", E_USER_ERROR);
     return;
+  }
+
+  public function getMap( ) {
+    return $this->_map;
   }
 
   /************************************************************************************************/
@@ -95,6 +100,6 @@ class Optimizer {
   /* State
   /************************************************************************************************/
   const YUI_COMPRESSOR = 'yuicompressor-2.4.7.jar';
-  private $_delete     = array();
+  private $_map = array();
 
 };
