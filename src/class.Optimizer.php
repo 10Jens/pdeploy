@@ -45,33 +45,23 @@ class Optimizer {
   /* Privates
   /************************************************************************************************/
   private function compressCss($file) {
-    if (!($temp = tempnam(sys_get_temp_dir(), 'pdeploy-temp-'))) trigger_error("Could not create a temporary file.", E_USER_ERROR);
-    $cmd = "java -jar '%s' '%s' -o '%s';";
-    $cmd = sprintf($cmd, escapeshellcmd(realpath(dirname(__FILE__)) . '/' . self::YUI_COMPRESSOR), escapeshellcmd($file), escapeshellcmd($temp));
-    if (system($cmd) === false) trigger_error("system() error with \"$cmd\"", E_USER_ERROR);
-    $retval = str_replace("\n", '', file_get_contents($temp));
-    if (!unlink($temp)) trigger_errer("Could not delete temporary file '$temp'.", E_USER_WARNING);
-    return $retval;
+    $args = "-o '%s';";
+    return $this->compress(self::CSS_COMPRESSOR, $file, $args);
   }
 
   private function compressJavascript($file) {
-    // Make the Closure POST request.
-    $source_code = file_get_contents($file);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'http://closure-compiler.appspot.com/compile');
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
-      'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
-      'output_format'     => 'json',
-      'output_info'       => 'compiled_code',
-      'warning_level'     => 'VERBOSE',
-      'js_code'           => $source_code,
-    )));
-    // Check the response.
-    $response_object = json_decode(curl_exec($ch));
-    return str_replace("\n", '', $response_object->compiledCode);
+    $args = "--compilation_level SIMPLE_OPTIMIZATIONS --js_output_file '%s';";
+    return $this->compress(self::JS_COMPRESSOR, $file, $args);
+  }
+
+  private function compress($jar, $file, $args) {
+    if (!($temp = tempnam(sys_get_temp_dir(), 'pdeploy-temp-'))) trigger_error("Could not create a temporary file.", E_USER_ERROR);
+    $command_format = "java -jar '%s' '%s' $args";
+    $command = sprintf($command_format, escapeshellcmd(realpath(dirname(__FILE__)) . '/' . $jar), escapeshellcmd($file), escapeshellcmd($temp));
+    if (system($command) === false) trigger_error("system() error with \"$command\"", E_USER_ERROR);
+    $retval = str_replace("\n", '', file_get_contents($temp));
+    if (!unlink($temp)) trigger_errer("Could not delete temporary file '$temp'.", E_USER_WARNING);
+    return $retval;
   }
 
   private function header($num_files, $input_size, $output_size) {
@@ -99,7 +89,8 @@ class Optimizer {
   /************************************************************************************************/
   /* State
   /************************************************************************************************/
-  const YUI_COMPRESSOR = 'yuicompressor-2.4.7.jar';
+  const CSS_COMPRESSOR = 'yuicompressor-2.4.7.jar';
+  const JS_COMPRESSOR = 'closure-compiler.jar';
   private $_map = array();
 
 };
