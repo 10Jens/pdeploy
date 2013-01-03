@@ -57,7 +57,7 @@ class Optimizer {
   private function compress($jar, $file, $args) {
     if (!($temp = tempnam(sys_get_temp_dir(), 'pdeploy-temp-'))) trigger_error("Could not create a temporary file.", E_USER_ERROR);
     $command_format = "java -jar '%s' '%s' $args";
-    $command = sprintf($command_format, escapeshellcmd(realpath(dirname(__FILE__)) . '/' . $jar), escapeshellcmd($file), escapeshellcmd($temp));
+    $command = sprintf($command_format, escapeshellcmd(realpath(dirname(__FILE__)) . '/' . self::BIN_DIR . $jar), escapeshellcmd($file), escapeshellcmd($temp));
     if (system($command) === false) trigger_error("system() error with \"$command\"", E_USER_ERROR);
     $retval = str_replace("\n", '', file_get_contents($temp));
     if (!unlink($temp)) trigger_errer("Could not delete temporary file '$temp'.", E_USER_WARNING);
@@ -89,6 +89,7 @@ class Optimizer {
   /************************************************************************************************/
   /* State
   /************************************************************************************************/
+  const BIN_DIR = 'bin/';
   const CSS_COMPRESSOR = 'yuicompressor-2.4.7.jar';
   const JS_COMPRESSOR = 'closure-compiler.jar';
   private $_map = array();
