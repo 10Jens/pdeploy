@@ -10,7 +10,7 @@ class Test_Class_Optimizer extends PDeploy_Unit_Test {
   const STYLE_MIN    = 'client-assets/style.min.css';
   const SCRIPT_1     = 'client-assets/script_1.js';
   const SCRIPT_2     = 'client-assets/script_2.js';
-  const SCRIPT_3     = 'client-assets/script_3.js'; // doesn't actually exist
+  const SCRIPT_3     = 'client-assets/script_3.js'; // empty file
   const SCRIPT_MIN   = 'client-assets/script.min.js';
 
   private static $o = null;
@@ -100,10 +100,19 @@ EOF;
    * @expectedExceptionMessage  it's already been packaged into
   **/
   public function test_bug_1( ) {
-    self::$o->crush('fail.js', array(
-      self::SCRIPT_1, // already crushed into self::SCRIPT_MIN
-      self::SCRIPT_3, // doesn't actually exist
-    ));
+    self::$o->crush('fail.js', self::SCRIPT_1); // already crushed into self::SCRIPT_MIN
+    return;
+  }
+
+  /**
+   * If you try to crush() an empty file, PHP will throw a divide by zero error when attempting to
+   * generate the pretty meta comment in the header() method.
+   *
+   * @expectedException         PDeploy\Exception
+   * @expectedExceptionMessage  is empty
+  **/
+  public function test_bug_2( ) {
+    self::$o->crush('fail.js', self::SCRIPT_3); // SCRIPT_3 is empty
     return;
   }
 

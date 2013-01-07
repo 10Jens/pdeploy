@@ -12,9 +12,10 @@ class Optimizer {
     if (!is_array($sources)) $sources = array($sources); // allow single files or arrays
     $callback    = null;
     $output_text = '';
+    $num_files   = 0;
     $input_size  = 0;
     $output_size = 0;
-    if (!touch($dest)) \PDeploy::error("Could not touch destination file '$file'.");
+    if (!touch($dest)) \PDeploy::error("Could not touch destination file '%s'.", $file);
     // What kind of content is this?
     $pathinfo = pathinfo($dest);
     switch ($pathinfo['extension']) {
@@ -28,16 +29,23 @@ class Optimizer {
     }
     // Loop through and compile each source file.
     foreach ($sources as $source) {
-      if (!is_readable($source)) \PDeploy::error("'$source' is not readable.");
+      if (!is_readable($source)) \PDeploy::error("'%s' is not readable.", $source);
+      if (!filesize($source)) {
+        \PDeploy::error("'%s' is empty.", $source);
+        continue;
+      }
       $compiled    = call_user_func($callback, $source);
       $output_text .= "/* $source */ $compiled\n";
       $input_size  += filesize($source);
       $output_size += strlen($compiled);
+      $num_files   += 1;
     }
-    $this->_map = array_merge_recursive($this->_map, array_fill_keys($sources, $dest));
-    // Attach some metadata and save the crushed output into $destination.
-    $output_text = $this->header(count($sources), $input_size, $output_size) . $output_text;
-    if (!file_put_contents($dest, $output_text)) \PDeploy::error("Failed to save output to file '$dest'.");
+    if ($num_files > 0) {
+      $this->_map = array_merge_recursive($this->_map, array_fill_keys($sources, $dest));
+      // Attach some metadata and save the crushed output into $destination.
+      $output_text = $this->header($num_files, $input_size, $output_size) . $output_text;
+      if (!file_put_contents($dest, $output_text)) \PDeploy::error("Failed to save output to file '%s'.", $dest);
+    }
     return;
   }
 
@@ -64,7 +72,7 @@ class Optimizer {
     $command = sprintf($command_format, escapeshellcmd(realpath(dirname(__FILE__)) . '/' . self::BIN_DIR . $jar), escapeshellcmd($file), escapeshellcmd($temp));
     if (system($command) === false) \PDeploy::error("system() error with \"$command\"");
     $retval = str_replace("\n", '', file_get_contents($temp));
-    if (!unlink($temp)) trigger_errer("Could not delete temporary file '$temp'.", E_USER_WARNING);
+    if (!unlink($temp)) \PDeploy::error("Could not delete temporary file '%s'.", $temp);
     return $retval;
   }
 
@@ -79,10 +87,10 @@ class Optimizer {
   }
 
   private function bytesize($bytesize) {
-    $TB = 1099511627776;
-    $GB = 1073741824;
-    $MB = 1048576;
     $KB = 1024;
+    $MB = pow(1024, 2);
+    $GB = pow(1024, 3);
+    $TB = pow(1024, 4);
     if     ($bytesize >= $TB) return number_format($bytesize / $TB, 2) . ' TB';
     elseif ($bytesize >= $GB) return number_format($bytesize / $GB, 2) . ' GB';
     elseif ($bytesize >= $MB) return number_format($bytesize / $MB, 2) . ' MB';
@@ -93,9 +101,10 @@ class Optimizer {
   /************************************************************************************************/
   /* State
   /************************************************************************************************/
-  const BIN_DIR = 'bin/';
+  const BIN_DIR        = 'bin/';
   const CSS_COMPRESSOR = 'yuicompressor-2.4.7.jar';
-  const JS_COMPRESSOR = 'closure-compiler.jar';
+  const JS_COMPRESSOR  = 'closure-compiler.jar';
+
   private $_map = array();
 
 };
