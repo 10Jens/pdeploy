@@ -10,6 +10,7 @@ class Test_Class_Optimizer extends PDeploy_Unit_Test {
   const STYLE_MIN    = 'client-assets/style.min.css';
   const SCRIPT_1     = 'client-assets/script_1.js';
   const SCRIPT_2     = 'client-assets/script_2.js';
+  const SCRIPT_3     = 'client-assets/script_3.js'; // doesn't actually exist
   const SCRIPT_MIN   = 'client-assets/script.min.js';
 
   private static $o = null;
@@ -85,6 +86,24 @@ EOF;
       self::SCRIPT_2     => self::SCRIPT_MIN,
     );
     $this->assertSame($expected, self::$o->getMap());
+    return;
+  }
+
+  /**
+   * If you mapped the same source file into two different .min files, the content map will hold the
+   * destination 'Array' for that source file. There is no logical fix for this because every time
+   * that source file is requested, there would need to be a disambiguation as to which .min file
+   * should be included (the assumption being that each alternative .min for that source could/will
+   * include other, conflicting, content as well - otherwise, there wouldn't be a duplicate).
+   *
+   * @expectedException         PDeploy\Exception
+   * @expectedExceptionMessage  it's already been packaged into
+  **/
+  public function test_bug_1( ) {
+    self::$o->crush('fail.js', array(
+      self::SCRIPT_1, // already crushed into self::SCRIPT_MIN
+      self::SCRIPT_3, // doesn't actually exist
+    ));
     return;
   }
 
