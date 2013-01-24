@@ -82,11 +82,20 @@ class Filesystem_Linux implements FilesystemInterface {
     return $name;
   }
 
+  /**
+   * If $dirname is given as an array, when installFile() is called, each directory in the array
+   * is scanned for the desired file - the file used will be from the first such directory to contain
+   * a match. The directories are scanned in the order provided to this method.
+   * This is useful for having defaults/overrides in cases where conditional builds are required.
+   */
   public function setFileDepot($dirname) {
-    $this->assertDirectory($dirname);
-    $this->assertWritable($dirname);
-    $this->_file_depot = $dirname;
-    if (substr($this->_file_depot, -1) !== '/') $this->_file_depot .= '/';
+    if (!is_array($dirname)) $dirname = array($dirname);
+    foreach ($dirname as $d) {
+      $this->assertDirectory($d);
+      $this->assertWritable($d);
+      if (substr($d, -1) !== '/') $d .= '/';
+      $this->_file_depot[] = $d;
+    }
     return;
   }
 
@@ -94,16 +103,23 @@ class Filesystem_Linux implements FilesystemInterface {
     return $this->_file_depot;
   }
 
+  /**
+   * See notes for setFileDepot() for usage with multiple depots.
+   */
   public function installFile($file, $directory, $ownership = 0755) {
-    $src = $this->getFileDepot() . $file;
-    $this->assertFile($src);
-    $this->assertReadable($src);
-    $this->assertDirectory($directory);
-    $this->assertWritable($directory);
-    $dest = $directory . (substr($directory, -1) !== '/' ? '/' : '') . $file;
-    if (!is_file($dest)) $this->copy($src, $dest);
-    if (!chmod($dest, $ownership)) \PDeploy::error("Could not change permissions on '%s' to %o.", $dest, $ownership);
-    return;
+    foreach ($this->getFileDepot() as $depot) {
+      $src = $depot . $file;
+      if (is_readable($src)) {
+        $this->assertFile($src);
+        $this->assertDirectory($directory);
+        $this->assertWritable($directory);
+        $dest = $directory . (substr($directory, -1) !== '/' ? '/' : '') . $file;
+        if (!is_file($dest)) $this->copy($src, $dest);
+        if (!chmod($dest, $ownership)) \PDeploy::error("Could not change permissions on '%s' to %o.", $dest, $ownership);
+        return;
+      }
+    }
+    \PDeploy::error("Could not find file '%s' in any configured depot location ('%s').", $file, implode(',', $this->getFileDepot()));
   }
 
   public function installDirectory($directory, $ownership = 0755) {
@@ -120,6 +136,6 @@ class Filesystem_Linux implements FilesystemInterface {
     return;
   }
 
-  private $_file_depot = null;
+  private $_file_depot = array();
 
 };

@@ -189,10 +189,13 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
   }
 
   public function test_setFileDepot_positive( ) {
-    $depot = 'test-depot';
-    $this->assertTrue(mkdir($depot));
-    $this->pd->setFileDepot($depot);
-    $this->assertTrue(rmdir($depot));
+    $depot_1 = 'test-depot-1';
+    $depot_2 = 'test-depot-2';
+    $this->assertTrue(mkdir($depot_1));
+    $this->assertTrue(mkdir($depot_2));
+    $this->pd->setFileDepot(array($depot_1, $depot_2));
+    $this->assertTrue(rmdir($depot_1));
+    $this->assertTrue(rmdir($depot_2));
     return;
   }
 
@@ -214,7 +217,7 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     $depot = 'test-depot';
     $this->assertTrue(mkdir($depot));
     $this->pd->setFileDepot($depot);
-    $this->assertSame($depot . '/', $this->pd->getFileDepot());
+    $this->assertSame(array($depot . '/'), $this->pd->getFileDepot());
     $this->assertTrue(rmdir($depot));
     return;
   }
@@ -223,10 +226,37 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     $file = 'some-data.txt';
     $dir = './';
     $path = $dir . $file;
-    $this->pd->setFileDepot('file-depot');
+    $this->pd->setFileDepot('file-depot-1');
     $this->pd->installFile($file, $dir);
     $this->pd->assertFile($path);
     $this->assertTrue(unlink($path));
+    return;
+  }
+
+  public function test_installFile_with_multiple_depots( ) {
+    $depots = array(
+      'file-depot-1',
+      'file-depot-2',
+    );
+    $files = array(
+      'multiple-depot-test-1.txt',
+      'multiple-depot-test-2.txt',
+    );
+    $dir = './';
+    $path_1 = $dir . $files[0];
+    $path_2 = $dir . $files[1];
+    $this->pd->setFileDepot($depots);
+    // Install & verify the first file (should come out of depot-1)
+    $this->pd->installFile($files[0], $dir);
+    $this->pd->assertFile($path_1);
+    $this->assertRegExp('/a/', file_get_contents($path_1));
+    // Install & verify the second file (should come out of depot-2)
+    $this->pd->installFile($files[1], $dir);
+    $this->pd->assertFile($path_2);
+    $this->assertRegExp('/c/', file_get_contents($path_2));
+    // Clean up.
+    $this->assertTrue(unlink($path_1));
+    $this->assertTrue(unlink($path_2));
     return;
   }
 
