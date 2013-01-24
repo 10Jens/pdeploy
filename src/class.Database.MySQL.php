@@ -56,7 +56,18 @@ class Database_MySQL implements DatabaseInterface {
       case 'sql':
         $queries = file_get_contents($filename);
         foreach ($replacements as $search => $replace) $queries = str_replace($search, $replace, $queries);
-        if ($this->_pdo->exec($queries) === false) {
+        // The PHP mysql extension currently contains a bug which makes use of LOAD DATA LOCAL INFILE
+        // obnoxiously difficult (see https://bugs.php.net/bug.php?id=54158). Also, the PHP mysqlnd
+        // extension currently has some sort of bug whereby using said command is unstable with large
+        // files (in testing, we got loads of seg faults and "packet out of order" warnings out of
+        // pdo/mysqlnd). As a workaround until these bugs are fixed, any file which contains a LOAD
+        // DATA LOCAL INFILE call will be executed not through $this->_pdo, but with a shell command
+        // to system() using the mysql CLI binary.
+        // Yeah. Not awesome. I'm open to suggestions.
+        if (strpos($queries, 'LOAD DATA LOCAL INFILE') !== false) {
+          $command = "mysql --host={$this->_host} --user={$this->_username} --password={$this->_password} --database={$this->_database} --local-infile -e " . escapeshellarg($queries);
+          system($command);
+        } elseif ($this->_pdo->exec($queries) === false) {
           $error = $this->_pdo->errorInfo();
           \PDeploy::error('PDO[%d]: %s.', $this->_pdo->errorCode(), $error[2]);
         }
