@@ -65,7 +65,7 @@ class Database_MySQL implements DatabaseInterface {
         // to system() using the mysql CLI binary.
         // Yeah. Not awesome. I'm open to suggestions.
         if (strpos($queries, 'LOAD DATA LOCAL INFILE') !== false) {
-          $command = "mysql --host={$this->_host} --user={$this->_username} --password={$this->_password} --database={$this->_database} --local-infile -e " . escapeshellarg($queries);
+          $command = "mysql --host={$this->_host} --port={$this->_port} --user={$this->_username} --password={$this->_password} --database={$this->_database} --local-infile -e " . escapeshellarg($queries);
           system($command);
         } elseif ($this->_pdo->exec($queries) === false) {
           $error = $this->_pdo->errorInfo();
