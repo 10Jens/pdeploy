@@ -105,15 +105,19 @@ class Filesystem_Linux implements FilesystemInterface {
 
   /**
    * See notes for setFileDepot() for usage with multiple depots.
+   *
+   * If $newname is given, you can optionally rename the file during installation. This is useful
+   * when you have many same, similar, or vague files to install and you want to make them more
+   * distinct or descriptive in the depot location.
    */
-  public function installFile($file, $directory, $ownership = 0755) {
+  public function installFile($file, $directory, $ownership = 0755, $newname = null) {
     foreach ($this->getFileDepot() as $depot) {
       $src = $depot . $file;
       if (is_readable($src)) {
         $this->assertFile($src);
         $this->assertDirectory($directory);
         $this->assertWritable($directory);
-        $dest = $directory . (substr($directory, -1) !== '/' ? '/' : '') . $file;
+        $dest = $directory . (substr($directory, -1) !== '/' ? '/' : '') . ($newname === null ? $file: $newname);
         if (!is_file($dest)) $this->copy($src, $dest);
         if (!chmod($dest, $ownership)) \PDeploy::error("Could not change permissions on '%s' to %o.", $dest, $ownership);
         return;

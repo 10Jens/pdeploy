@@ -260,6 +260,20 @@ class Test_Class_Filesystem_Linux extends PDeploy_Unit_Test {
     return;
   }
 
+  public function test_installFile_with_different_name( ) {
+    $oldname  = 'some-data.txt';
+    $newname  = 'other-data.txt';
+    $depot    = 'file-depot-1';
+    $dir      = './';
+    $expected = $dir . $newname;
+    $this->assertFalse(is_file($expected));
+    $this->pd->setFileDepot($depot);
+    $this->pd->installFile($oldname, $dir, 0755, $newname);
+    $this->pd->assertFile($expected);
+    $this->assertTrue(unlink($expected));
+    return;
+  }
+
   public function test_installDirectory( ) {
     $dir = 'testing';
     $this->assertFalse(is_dir($dir));

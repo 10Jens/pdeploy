@@ -25,7 +25,7 @@ interface FilesystemInterface {
   public function tempDir( );
   public function setFileDepot($dirname);
   public function getFileDepot( );
-  public function installFile($file, $directory, $ownership);
+  public function installFile($file, $directory, $ownership, $newname);
   public function installDirectory($directory, $ownership);
   public function installSymlink($target, $name);
 
