@@ -152,4 +152,15 @@ class Test_Class_Database_MySQL extends PDeploy_Unit_Test {
     return;
   }
 
+  /**
+   * Bug: If you attempt to executeFile() on an empty file, PDO::exec() will fail with an 'execute
+   * an empty query' Exception.
+   *
+   * Fix: quietly skip empty files.
+  **/
+  public function test_bug_1( ) {
+    self::$pd->executeFile('database-assets/empty_file.sql');
+    return;
+  }
+
 };

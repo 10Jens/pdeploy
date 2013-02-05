@@ -30,10 +30,7 @@ class Optimizer {
     // Loop through and compile each source file.
     foreach ($sources as $source) {
       if (!is_readable($source)) \PDeploy::error("'%s' is not readable.", $source);
-      if (!filesize($source)) {
-        \PDeploy::error("'%s' is empty.", $source);
-        continue;
-      }
+      if (!filesize($source)) continue;
       $compiled    = call_user_func($callback, $source);
       $output_text .= "/* $source */ $compiled\n";
       $input_size  += filesize($source);
@@ -81,7 +78,7 @@ class Optimizer {
     $output .= " * files:  $num_files\n";
     $output .= " * input:  " . $this->bytesize($input_size) . "\n";
     $output .= " * output: " . $this->bytesize($output_size) . "\n";
-    $output .= " * ratio:  " . floor(100 * $output_size / $input_size) . "%\n";
+    if ($input_size) $output .= " * ratio:  " . floor(100 * $output_size / $input_size) . "%\n";
     $output .= "**/\n";
     return $output;
   }

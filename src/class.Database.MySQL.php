@@ -54,6 +54,7 @@ class Database_MySQL implements DatabaseInterface {
     $pathinfo = pathinfo($filename);
     switch ($pathinfo['extension']) {
       case 'sql':
+        if (!filesize($filename)) continue;
         $queries = file_get_contents($filename);
         foreach ($replacements as $search => $replace) $queries = str_replace($search, $replace, $queries);
         // The PHP mysql extension currently contains a bug which makes use of LOAD DATA LOCAL INFILE
