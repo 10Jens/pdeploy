@@ -59,7 +59,7 @@ class Optimizer {
   }
 
   private function compressJavascript($file) {
-    $args = "--language_in=ECMASCRIPT5_STRICT --compilation_level SIMPLE_OPTIMIZATIONS --warning_level QUIET --js_output_file '%s';";
+    $args = "--language_in=ECMASCRIPT5 --compilation_level SIMPLE_OPTIMIZATIONS --warning_level QUIET --js_output_file '%s';";
     return $this->compress(self::JS_COMPRESSOR, $file, $args);
   }
 
