@@ -1,4 +1,6 @@
 {
+  "name": "forgecrafted/pdeploy",
+  "description": "Install and upgrade PHP projects.",
   "require": {
     "phpunit/phpunit": "*",
     "phpunit/dbunit": "*"
